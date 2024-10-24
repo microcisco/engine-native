@@ -27,12 +27,15 @@ THE SOFTWARE.
 #include "CCImage.h"
 
 #include <string>
+#include<stdio.h>
 #include <ctype.h>
 #include <assert.h>
 
 #include "base/CCData.h"
 #include "base/ccConfig.h" // CC_USE_JPEG, CC_USE_TIFF, CC_USE_WEBP
 #include "base/ccUtils.h"
+
+#include "external/sources/astc/astcenccli_toplevel.cpp"
 
 #ifndef MIN
 #define MIN(x,y) (((x) > (y)) ? (y) : (x))
@@ -557,6 +560,30 @@ bool Image::initWithImageFile(const std::string& path)
     _filePath = path;
 
     Data data = FileUtils::getInstance()->getDataFromFile(_filePath);
+
+	if (!data.isNull() && data.getSize() > 8) {
+		unsigned char* c1 = data.getBytes();
+		unsigned char c2[8] = { 0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66 };
+		bool tag = true;
+		for (int i = 0; i < 8; ++i) {
+			char a1 = c1[i];
+			char a2 = c2[i];
+			if (c1[i] != c2[i]) {
+				tag = false;
+				break;
+			}
+		}
+		if (tag) {
+			int size = data.getSize() - 8;
+			for (int i = 8; i < data.getSize(); i++)
+			{
+				c1[i] ^= 10086;
+			}
+			ret = initWithImageData(c1 + 8, size);
+			return ret;
+		}
+	}
+
 
     if (!data.isNull())
     {
@@ -1824,11 +1851,17 @@ bool Image::initWithASTCData(const unsigned char *data, ssize_t dataLen)
         return false;
     }
 
-    assert(Configuration::getInstance()->supportsASTC());
+    //assert(Configuration::getInstance()->supportsASTC());
     if (Configuration::getInstance()->supportsASTC() == false)
     {
-        CCLOG("initWithASTCData: ERROR: Unsupported ASTC Compress texture on this device");
-        return false;
+        //CCLOG("initWithASTCData: ERROR: Unsupported ASTC Compress texture on this device");
+        //return false;
+		CCLOG("cocos2d: Hardware ASTC decoder not present. Using software decoder");
+	    char *args1[] = { "program_name", "arg1", "arg2", "arg3" };
+		png_res a1 = astcenc_main(0, args1, data, dataLen);
+		int h = initWithPngData(a1.png, a1.len);
+		//STBIW_FREE(a1.png);
+		return h;
     }
     _renderFormat = getASTCFormat(header);
 

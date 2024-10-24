@@ -53,6 +53,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Cocos2dxEditBox {
 
@@ -83,6 +84,7 @@ public class Cocos2dxEditBox {
         private float mLineWidth = 2f;
         private boolean keyboardVisible = false;
         private int mScreenHeight;
+        private int mTextHeight = 0;
         private int mTopMargin = 0;
         private int mOrientation;
 
@@ -98,11 +100,15 @@ public class Cocos2dxEditBox {
             mPaint.setStyle(Paint.Style.FILL);
             mPaint.setColor(mLineColor);
             mOrientation = this.getResources().getConfiguration().orientation;
+            mTextHeight = getHeight();
 
+            Cocos2dxActivity context1 = context;
+            Cocos2dxEditText cocos2dxEditText = this;
             mTextWatcher = new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                   // Toast.makeText(context1, "刷新editBox", Toast.LENGTH_SHORT).show();
+                    cocos2dxEditText.invalidate();
                 }
 
                 @Override
@@ -242,6 +248,9 @@ public class Cocos2dxEditBox {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
+                    if (mTextHeight == 0) {
+                        mTextHeight = getHeight();
+                    }
                     Rect r = new Rect();
                     getWindowVisibleDisplayFrame(r);
                     int heightDiff = getRootView().getHeight() - (r.bottom - r.top);
@@ -257,17 +266,19 @@ public class Cocos2dxEditBox {
                         }
                     }
 
-                    if (Cocos2dxEditText.this.mTopMargin == 0 && r.bottom != getRootView().getHeight()) {
-                        Cocos2dxEditText.this.setTopMargin(r.bottom);
+                    if (mTopMargin != r.bottom && r.bottom != getRootView().getHeight()) {
+                        Cocos2dxEditText.this.setTopMargin(r.bottom, 0);
+                    } else if (mTextHeight - getHeight() > 5) {
+                        Cocos2dxEditText.this.setTopMargin(r.bottom, -mTextHeight + getHeight());
                     }
                 }
             });
         }
 
-        private void setTopMargin(int topMargin) {
+        private void setTopMargin(int topMargin, int offset) {
             mTopMargin = topMargin;
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mEditText.getLayoutParams();
-            layoutParams.topMargin = mTopMargin - getHeight();
+            layoutParams.topMargin = mTopMargin - mTextHeight + offset;
             setLayoutParams(layoutParams);
             requestLayout();
         }

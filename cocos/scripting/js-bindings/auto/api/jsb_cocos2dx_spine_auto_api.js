@@ -6474,6 +6474,14 @@ bool
 },
 
 /**
+ * @method destroy
+ */
+destroy : function (
+)
+{
+},
+
+/**
  * @method setAttachment
 * @param {String|String} str
 * @param {char|String} char
@@ -7304,6 +7312,14 @@ cachemodeattachutil
  */
 paused : function (
 bool 
+)
+{
+},
+
+/**
+ * @method onDisable
+ */
+onDisable : function (
 )
 {
 },

@@ -63,7 +63,7 @@ namespace cocos2d { namespace network {
         DownloaderHints hints =
         {
             6,
-            45,
+            120,
             ".tmp"
         };
         new(this)Downloader(hints);

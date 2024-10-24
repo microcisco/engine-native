@@ -378,7 +378,7 @@ static bool WebSocket_constructor(se::State& s)
 
         obj->setPrivateData(cobj);
 
-        obj->root();
+        // obj->root();
 
         return true;
     }

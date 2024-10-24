@@ -74,6 +74,9 @@ public:
         JPG,
         //! PNG
         PNG,
+        //civi encrypt,don't delete//
+        ENCRYPTEDPNG, //加密后的Png图片
+        //civi encrypt,don't delete//
         //! TIFF
         TIFF,
         //! WebP
@@ -225,6 +228,9 @@ public:
     @return true if loaded correctly.
     */
     bool initWithImageFile(const std::string& path);
+    //civi encrypt,don't delete//
+    void deEncryptPng(unsigned char **copyData, const char *key, ssize_t dataLen);
+    //civi encrypt,don't delete//
 
     /**
     @brief Load image from stream buffer.
@@ -306,6 +312,10 @@ protected:
     // false if we can't auto detect the image is premultiplied or not.
     bool _hasPremultipliedAlpha;
     std::string _filePath;
+    //civi encrypt signPass,don't delete//
+    const char *signKey = "hdyxxsxn";
+    const char *passWord = "hdyxxsxn220921";
+    //civi encrypt signPass,don't delete//
     bool _isCompressed = false;
 
 protected:
@@ -333,6 +343,9 @@ protected:
     bool isEtc2(const unsigned char * data, ssize_t dataLen);
     bool isASTC(const unsigned char * data, ssize_t detaLen);
     bool isS3TC(const unsigned char * data,ssize_t dataLen);
+    //civi encrypt,don't delete//
+    bool isEncryptedPng(const unsigned char * data,ssize_t dataLen);
+    //civi encrypt,don't delete//
 
     PixelFormat getASTCFormat(const unsigned char * pHeader) const;
 };
